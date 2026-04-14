@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>NEURO ACCESS · نظام المصادقة الحيوية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-deep: #020408;
+      --panel-bg: rgba(6, 12, 24, 0.85);
+      --cyan: #00f0ff;
+      --cyan-dim: rgba(0, 240, 255, 0.15);
+      --neon-green: #2eff9e;
+      --text-primary: #eef5ff;
+      --text-dim: #7b93aa;
+      --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 30%, #0a1428 0%, #010101 90%);
+      font-family: 'Space Grotesk', 'Share Tech Mono', sans-serif;
+      color: var(--text-primary);
+      overflow: hidden;
+      position: relative;
+      backdrop-filter: blur(2px);
+    }
+
+    .overlay-noise {
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.02) 0px, transparent 2px, transparent 5px);
+      pointer-events: none;
+      z-index: 1;
+      mix-blend-mode: overlay;
+    }
+
+    .scan-effect {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0, 240, 255, 0.02) 50%, transparent 60%);
+      background-size: 100% 8px;
+      animation: scanMove 8s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.5;
+    }
+
+    @keyframes scanMove {
+      0% { background-position-y: 0; }
+      100% { background-position-y: 100%; }
+    }
+
+    /* شبكة هولوغرافية */
+    #hologrid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .scanning #hologrid {
+      opacity: 0.35;
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 5;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5vh 2vw;
+    }
+
+    .core-panel {
+      width: 95vw;
+      max-width: 1400px;
+      height: 92vh;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 3vh;
+      box-shadow: var(--shadow-heavy), 0 0 0 1px rgba(0, 240, 255, 0.1) inset;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5vh 2.5vw;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      background: linear-gradient(90deg, rgba(0, 240, 255, 0.05) 0%, transparent 50%);
+    }
+
+    .system-title {
+      display: flex;
+      align-items: center;
+      gap: 1vw;
+    }
+
+    .pulse-dot {
+      width: 1.8vh;
+      height: 1.8vh;
+      background: var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 0 0 2vh var(--neon-green);
+      animation: pulseGreen 1.2s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .system-title h1 {
+      font-weight: 600;
+      font-size: clamp(1.2rem, 2vw, 1.8rem);
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #fff, var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 0.3vw;
+    }
+
+    .status-tags {
+      display: flex;
+      gap: 1.5vw;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(0.8rem, 1vw, 1rem);
+    }
+
+    .time-display {
+      color: var(--cyan);
+      font-weight: 500;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .scanner-section {
+      padding: 2vh 1.5vw;
+      border-right: 1px solid rgba(0, 240, 255, 0.15);
+      background: radial-gradient(circle at 50% 40%, rgba(0, 240, 255, 0.03) 0%, transparent 70%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .biometric-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .scanner-ring {
+      position: relative;
+      width: min(28vh, 28vw);
+      height: min(28vh, 28vw);
+      margin: 1vh auto;
+    }
+
+    .outer-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 240, 255, 0.3);
+      box-shadow: 0 0 4vh rgba(0, 240, 255, 0.1) inset;
+      animation: rotateSlow 20s linear infinite;
+    }
+
+    .middle-ring {
+      position: absolute;
+      inset: 2vh;
+      border-radius: 50%;
+      border: 1px dashed rgba(0, 240, 255, 0.5);
+      animation: rotateReverse 15s linear infinite;
+    }
+
+    .inner-ring {
+      position: absolute;
+      inset: 4vh;
+      border-radius: 50%;
+      border: 1px solid rgba(46, 255, 158, 0.4);
+      box-shadow: 0 0 3vh rgba(46, 255, 158, 0.2);
+    }
+
+    @keyframes rotateSlow { 100% { transform: rotate(360deg); } }
+    @keyframes rotateReverse { 100% { transform: rotate(-360deg); } }
+
+    .fingerprint-sensor {
+      position: absolute;
+      inset: 2.5vh;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(0, 240, 255, 0.2), transparent 60%);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(0, 240, 255, 0.6);
+      box-shadow: 0 0 5vh rgba(0, 240, 255, 0.2);
+      overflow: hidden;
+    }
+
+    .sensor-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(46, 255, 158, 0.3), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .scanning .sensor-glow { opacity: 1; }
+
+    .fingerprint-icon {
+      font-size: 8vh;
+      color: rgba(0, 240, 255, 0.8);
+      text-shadow: 0 0 3vh var(--cyan);
+      z-index: 3;
+    }
+
+    .scan-beam {
+      position: absolute;
+      top: -20%;
+      left: -10%;
+      width: 120%;
+      height: 20%;
+      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.8), transparent);
+      filter: blur(6px);
+      transform: rotate(45deg);
+      animation: beamSweep 2.5s ease-in-out infinite;
+      opacity: 0;
+      z-index: 5;
+    }
+
+    .scanning .scan-beam { opacity: 0.8; }
+
+    @keyframes beamSweep {
+      0% { transform: translateX(-150%) rotate(45deg); }
+      100% { transform: translateX(150%) rotate(45deg); }
+    }
+
+    canvas#waveform {
+      width: 90%;
+      height: 6vh;
+      margin-top: 1vh;
+      opacity: 0.6;
+    }
+
+    .scan-status {
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      padding: 1.5vh 1vw;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 2vh;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      backdrop-filter: blur(5px);
+      margin-top: 1vh;
+    }
+
+    .progress-bar-bg {
+      height: 1vh;
+      background: rgba(255,255,255,0.05);
+      border-radius: 1vh;
+      overflow: hidden;
+      margin: 1.5vh 0 0.5vh;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--neon-green));
+      box-shadow: 0 0 2vh var(--cyan);
+      transition: width 0.1s linear;
+    }
+
+    .identity-section {
+      padding: 2vh 2vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .identity-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5vh;
+    }
+
+    .glitch-text {
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      text-shadow: 0.05em 0 0 #0ff, -0.05em -0.025em 0 #f0f;
+      animation: glitchText 3s infinite;
+    }
+
+    @keyframes glitchText {
+      0%,100% { text-shadow: 0.05em 0 0 #0ff, -0.05em -0.025em 0 #f0f; }
+      25% { text-shadow: -0.05em -0.025em 0 #0ff, 0.025em 0.05em 0 #f0f; }
+      50% { text-shadow: 0.025em 0.05em 0 #0ff, 0.05em 0 0 #f0f; }
+      75% { text-shadow: -0.025em 0 0 #0ff, -0.025em -0.025em 0 #f0f; }
+    }
+
+    .clearance-badge {
+      background: rgba(0, 240, 255, 0.1);
+      padding: 0.8vh 1.5vw;
+      border-radius: 5vh;
+      border: 1px solid var(--cyan);
+      font-weight: 500;
+      font-size: clamp(0.8rem, 1vw, 1rem);
+    }
+
+    .profile-card {
+      display: grid;
+      grid-template-columns: 0.8fr 2fr;
+      gap: 1.5vw;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 3vh;
+      padding: 2vh 1.5vw;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transform: translateY(30px) scale(0.98);
+      transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .profile-card.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .avatar-container {
+      position: relative;
+      border-radius: 2.5vh;
+      overflow: hidden;
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      box-shadow: 0 0 3vh rgba(0, 240, 255, 0.1);
+      aspect-ratio: 1/1;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1vh 1vw;
+    }
+
+    .info-field {
+      background: rgba(0, 20, 40, 0.5);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 1.8vh;
+      padding: 1vh 1.2vw;
+    }
+
+    .info-label {
+      font-size: clamp(0.6rem, 0.9vw, 0.8rem);
+      text-transform: uppercase;
+      color: var(--text-dim);
+      letter-spacing: 0.1vw;
+    }
+
+    .info-value {
+      font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .action-bar {
+      margin-top: 2vh;
+      display: flex;
+      gap: 1.5vw;
+      justify-content: flex-end;
+    }
+
+    .cyber-button {
+      background: transparent;
+      border: 1.5px solid var(--cyan);
+      color: var(--cyan);
+      padding: 1.2vh 2vw;
+      border-radius: 8vh;
+      font-weight: 600;
+      letter-spacing: 0.2vw;
+      text-transform: uppercase;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: 0.2s;
+      box-shadow: 0 0 2vh rgba(0, 240, 255, 0.1);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(0.8rem, 1vw, 1rem);
+    }
+
+    .cyber-button:hover {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: 0 0 3vh var(--cyan);
+    }
+
+    .startup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(1, 4, 9, 0.95);
+      backdrop-filter: blur(15px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.4s;
+    }
+
+    .startup-modal {
+      max-width: 90vw;
+      width: 500px;
+      background: var(--panel-bg);
+      border: 1px solid var(--cyan);
+      border-radius: 5vh;
+      padding: 3vh 4vw;
+      text-align: center;
+      box-shadow: 0 0 10vh rgba(0, 240, 255, 0.2);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* إخفاء قسم قاعدة البيانات */
+    .database-section {
+      display: none;
+    }
+
+    @media (max-width: 800px) {
+      .dashboard { grid-template-columns: 1fr; }
+      .scanner-section { border-right: none; border-bottom: 1px solid var(--cyan); }
+      .profile-card { grid-template-columns: 1fr; }
+      .avatar-container { max-width: 200px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="hologrid"></canvas>
+<div class="overlay-noise"></div>
+<div class="scan-effect"></div>
+
+<div class="startup-overlay" id="startupOverlay">
+  <div class="startup-modal">
+    <div style="font-size: 8vh; margin-bottom: 2vh;">⬚⬚⬚</div>
+    <h2 style="font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 2vh;">NEURO ACCESS</h2>
+    <p style="color: #aac8e4; margin-bottom: 3vh;">نظام مصادقة حيوية · استجابة صوتية · ترتيب ثابت</p>
+    <button class="cyber-button" id="initiateBtn" style="font-size: 1.3rem; padding: 1.5vh 3vw;">بدء جلسة آمنة</button>
+  </div>
+</div>
+
+<div class="main-container">
+  <div class="core-panel">
+    <div class="header-bar">
+      <div class="system-title">
+        <span class="pulse-dot"></span>
+        <h1>NEURO·ACCESS</h1>
+      </div>
+      <div class="status-tags">
+        <span>⚡ SIGMA-7</span>
+        <span class="time-display" id="liveTime">--:--:--</span>
+      </div>
+    </div>
+
+    <div class="dashboard">
+      <div class="scanner-section">
+        <div class="biometric-area">
+          <div class="scanner-ring" id="scannerRing">
+            <div class="outer-ring"></div>
+            <div class="middle-ring"></div>
+            <div class="inner-ring"></div>
+            <div class="fingerprint-sensor" id="fingerprintSensor">
+              <div class="sensor-glow"></div>
+              <div class="scan-beam"></div>
+              <div class="fingerprint-icon">⌾</div>
+            </div>
+          </div>
+          <canvas id="waveform" width="300" height="60"></canvas>
+        </div>
+
+        <div class="scan-status">
+          <div id="scanStateText">جاهز · اضغط المستشعر</div>
+          <div class="progress-bar-bg">
+            <div class="progress-fill" id="scanProgressFill"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span id="progressPercent">0%</span>
+            <span id="scanDetail">انتظار</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="identity-section">
+        <div class="identity-header">
+          <div class="glitch-text">IDENTITY</div>
+          <div class="clearance-badge">CLEARANCE 5</div>
+        </div>
+
+        <div class="profile-card" id="profileCard">
+          <div class="avatar-container">
+            <div class="avatar-img" id="avatarImage"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 1vh;">
+            <div style="font-size: clamp(1.5rem, 2.5vw, 2.2rem); font-weight: 700;" id="fullNameDisplay">---- ----</div>
+            <div class="info-grid">
+              <div class="info-field"><div class="info-label">الاسم الأول</div><div class="info-value" id="firstNameVal">---</div></div>
+              <div class="info-field"><div class="info-label">اللقب</div><div class="info-value" id="lastNameVal">---</div></div>
+              <div class="info-field"><div class="info-label">تاريخ الميلاد</div><div class="info-value" id="birthVal">----</div></div>
+              <div class="info-field"><div class="info-label">المنظمة</div><div class="info-value" id="orgVal">---</div></div>
+              <div class="info-field"><div class="info-label">الإقامة</div><div class="info-value" id="addressVal">---</div></div>
+              <div class="info-field"><div class="info-label">الحالة</div><div class="info-value" id="statusVal">غير مصادق</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <button class="cyber-button" id="rescanBtn">إعادة مسح</button>
+          <button class="cyber-button" id="verifyBtn">تحقق متقدم</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // ---------- قاعدة بيانات ثابتة للأشخاص (مرتبة) ----------
+    const subjects = [
+      {
+        id: 'SUB-001',
+        fullName: 'Mohamed kaddouri',
+        firstName: 'محمد',
+        lastName: 'قدوري',
+        birth: '2006-03-21',
+        org: 'الأمن السيبيراني ',
+        address: 'الخيثر',
+        status: 'تلميذ حاليا في ثانوية مفدي زكرياء ',
+        avatar: 'https://i.postimg.cc/5tGx7gWX/quality_restoration_20251212123329264.jpg',
+      },
+      {
+        id: 'SUB-002',
+        fullName: 'علالي محمد',
+        firstName: 'محمد',
+        lastName: 'علالي',
+        birth: '1997-09/12',
+        org: 'جامعة الأمير عبد القادر للعلوم الإسلامية المتواجدة على مستوى قسطينة',
+        address: 'الخيثر',
+        status: 'استاذ شريعة في بلدية الخيثر على مستوى ثانوية مفدي زكرياء',
+        avatar: 'https://i.postimg.cc/C52LFg6P/1776114231912.png',
+      },
+      {
+        id: 'SUB-003',
+        fullName: 'عبداللاوي سفيان',
+        firstName: 'سفيان',
+        lastName: 'عبداللاوي',
+        birth: 'غير معروف',
+        org: '',
+        address: 'بلدية الخيثر',
+        status: 'استاذ شريعة في بلدية الخيثر على مستوى ثانوية مفدي زكرياء',
+        avatar: '',
+      },
+      {
+        id: 'SUB-004',
+        fullName: 'سلمى ناصر القحطاني',
+        firstName: 'سلمى',
+        lastName: 'القحطاني',
+        birth: '2003-07-19',
+        org: 'أكاديمية نايف للأمن الوطني',
+        address: 'الرياض · الملز',
+        status: 'متدربة · تصريح محدود',
+        avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+      }
+    ];
+
+    // عداد للترتيب الثابت
+    let scanCounter = 0; // يبدأ من 0 (الشخص الأول)
+
+    // ---------- نظام الصوت ----------
+    let audioCtx = null;
+    
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch(e) {}
+    }
+
+    function playScanBeep() {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(now + 0.15);
+    }
+
+    function playSuccessChime() {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      [523.25, 659.25, 783.99].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.1, now + i*0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.1 + 0.3);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now + i*0.1); osc.stop(now + i*0.1 + 0.3);
+      });
+    }
+
+    function speakEnglishSuccess() {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance("Identity recognized");
+      utterance.lang = 'ar-US';
+      utterance.rate = 0.9;
+      const voices = window.speechSynthesis.getVoices();
+      const englishVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Google UK English Male') || v.name.includes('Daniel') || v.name.includes('Fred') || v.name.includes('Male')));
+      if (englishVoice) utterance.voice = englishVoice;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // ---------- عناصر DOM ----------
+    const startupOverlay = document.getElementById('startupOverlay');
+    const initiateBtn = document.getElementById('initiateBtn');
+    const sensor = document.getElementById('fingerprintSensor');
+    const scannerRing = document.getElementById('scannerRing');
+    const scanStateText = document.getElementById('scanStateText');
+    const progressFill = document.getElementById('scanProgressFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const scanDetail = document.getElementById('scanDetail');
+    const profileCard = document.getElementById('profileCard');
+    const avatarImage = document.getElementById('avatarImage');
+    const fullNameDisplay = document.getElementById('fullNameDisplay');
+    const firstNameVal = document.getElementById('firstNameVal');
+    const lastNameVal = document.getElementById('lastNameVal');
+    const birthVal = document.getElementById('birthVal');
+    const orgVal = document.getElementById('orgVal');
+    const addressVal = document.getElementById('addressVal');
+    const statusVal = document.getElementById('statusVal');
+    const rescanBtn = document.getElementById('rescanBtn');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const liveTimeEl = document.getElementById('liveTime');
+    const waveformCanvas = document.getElementById('waveform');
+    const ctxWave = waveformCanvas.getContext('2d');
+
+    let isScanning = false;
+    let scanInterval = null;
+    let currentProfile = subjects[0];
+    let scanProgress = 0;
+
+    // شبكة هولوغرافية
+    const gridCanvas = document.getElementById('hologrid');
+    const gridCtx = gridCanvas.getContext('2d');
+    let gridAngle = 0;
+
+    function resizeGrid() {
+      gridCanvas.width = window.innerWidth;
+      gridCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeGrid);
+    resizeGrid();
+
+    function drawHoloGrid() {
+      const w = gridCanvas.width, h = gridCanvas.height;
+      gridCtx.clearRect(0, 0, w, h);
+      if (!isScanning) {
+        gridCtx.strokeStyle = 'rgba(0, 240, 255, 0.03)';
+        gridCtx.lineWidth = 0.5;
+        const step = 60;
+        gridCtx.beginPath();
+        for (let x = 0; x <= w; x += step) { gridCtx.moveTo(x, 0); gridCtx.lineTo(x, h); }
+        for (let y = 0; y <= h; y += step) { gridCtx.moveTo(0, y); gridCtx.lineTo(w, y); }
+        gridCtx.stroke();
+        requestAnimationFrame(drawHoloGrid);
+        return;
+      }
+      gridAngle += 0.005;
+      const centerX = w/2, centerY = h/2, radius = Math.min(w, h) * 0.8;
+      gridCtx.save();
+      gridCtx.translate(centerX, centerY);
+      gridCtx.rotate(gridAngle);
+      gridCtx.strokeStyle = '#00f0ff';
+      gridCtx.lineWidth = 1.5;
+      gridCtx.shadowColor = '#00f0ff';
+      gridCtx.shadowBlur = 10;
+      for (let i = 1; i <= 8; i++) {
+        const r = (radius / 8) * i;
+        gridCtx.beginPath();
+        gridCtx.arc(0, 0, r, 0, Math.PI * 2);
+        gridCtx.strokeStyle = `rgba(0, 240, 255, ${0.1 + i*0.05})`;
+        gridCtx.stroke();
+      }
+      for (let i = 0; i < 24; i++) {
+        const angle = (i / 24) * Math.PI * 2;
+        const x = Math.cos(angle) * radius, y = Math.sin(angle) * radius;
+        gridCtx.beginPath();
+        gridCtx.moveTo(0, 0);
+        gridCtx.lineTo(x, y);
+        gridCtx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
+        gridCtx.stroke();
+      }
+      gridCtx.restore();
+      requestAnimationFrame(drawHoloGrid);
+    }
+    drawHoloGrid();
+
+    function updateClock() {
+      const d = new Date();
+      liveTimeEl.textContent = d.toLocaleTimeString('ar-SA', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    setInterval(updateClock, 500);
+    updateClock();
+
+    function drawWaveform() {
+      const w = waveformCanvas.width = waveformCanvas.clientWidth || 300;
+      const h = waveformCanvas.height = 60;
+      ctxWave.clearRect(0, 0, w, h);
+      ctxWave.strokeStyle = '#00f0ff';
+      ctxWave.lineWidth = 2;
+      ctxWave.shadowColor = '#00f0ff';
+      ctxWave.shadowBlur = 8;
+      ctxWave.beginPath();
+      const amp = isScanning ? 15 + 15 * Math.sin(scanProgress * 0.2) : 8;
+      for (let x = 0; x < w; x+= 2) {
+        const y = h/2 + Math.sin(x * 0.05 + Date.now()*0.005) * amp * (isScanning ? 1.5 : 1);
+        if (x === 0) ctxWave.moveTo(x, y);
+        else ctxWave.lineTo(x, y);
+      }
+      ctxWave.stroke();
+      requestAnimationFrame(drawWaveform);
+    }
+    drawWaveform();
+
+    function displayProfile(profile) {
+      fullNameDisplay.textContent = profile.fullName;
+      firstNameVal.textContent = profile.firstName;
+      lastNameVal.textContent = profile.lastName;
+      birthVal.textContent = profile.birth;
+      orgVal.textContent = profile.org;
+      addressVal.textContent = profile.address;
+      statusVal.textContent = profile.status;
+      avatarImage.style.backgroundImage = `url('${profile.avatar}')`;
+      profileCard.classList.add('visible');
+    }
+
+    function startScan() {
+      if (isScanning) return;
+      initAudio();
+      
+      isScanning = true;
+      scanProgress = 0;
+      scannerRing.classList.add('scanning');
+      document.body.classList.add('scanning');
+      scanStateText.textContent = '🔄 جاري مسح البصمة...';
+      scanDetail.textContent = 'تحليل الأنماط';
+      profileCard.classList.remove('visible');
+      
+      playScanBeep();
+      
+      // اختيار الشخص بالترتيب الثابت
+      currentProfile = subjects[scanCounter % subjects.length];
+      scanCounter++; // نزيد العداد للمرة القادمة
+      
+      scanInterval = setInterval(() => {
+        scanProgress += 1.8;
+        if (scanProgress >= 100) {
+          scanProgress = 100;
+          completeScan();
+          return;
+        }
+        progressFill.style.width = scanProgress + '%';
+        progressPercent.textContent = Math.floor(scanProgress) + '%';
+        
+        if (scanProgress < 30) scanDetail.textContent = 'التقاط النمط الحيوي';
+        else if (scanProgress < 60) scanDetail.textContent = 'مقارنة مع قاعدة البيانات';
+        else scanDetail.textContent = 'التحقق من التوقيع الرقمي';
+        
+        if (Math.floor(scanProgress) % 20 === 0) playScanBeep();
+      }, 35);
+    }
+
+    function completeScan() {
+      clearInterval(scanInterval);
+      isScanning = false;
+      scannerRing.classList.remove('scanning');
+      document.body.classList.remove('scanning');
+      progressFill.style.width = '100%';
+      progressPercent.textContent = '100%';
+      scanStateText.textContent = '✅ تم التحقق · هوية مؤكدة';
+      scanDetail.textContent = 'اكتمل';
+      
+      playSuccessChime();
+      speakEnglishSuccess();
+      
+      displayProfile(currentProfile);
+    }
+
+    function resetAndRescan() {
+      if (isScanning) {
+        clearInterval(scanInterval);
+        isScanning = false;
+        scannerRing.classList.remove('scanning');
+        document.body.classList.remove('scanning');
+      }
+      scanProgress = 0;
+      progressFill.style.width = '0%';
+      progressPercent.textContent = '0%';
+      scanStateText.textContent = 'جاهز · اضغط المستشعر';
+      scanDetail.textContent = 'انتظار';
+      profileCard.classList.remove('visible');
+    }
+
+    // ---------- الأحداث ----------
+    initiateBtn.addEventListener('click', () => {
+      startupOverlay.classList.add('hidden');
+      initAudio();
+      setTimeout(() => playSuccessChime(), 100);
+      // عرض أول شخص في البداية (دون مسح)
+      currentProfile = subjects[0];
+      displayProfile(currentProfile);
+    });
+
+    sensor.addEventListener('click', startScan);
+    scannerRing.addEventListener('click', () => sensor.click());
+
+    rescanBtn.addEventListener('click', () => {
+      resetAndRescan();
+      setTimeout(startScan, 200);
+    });
+
+    verifyBtn.addEventListener('click', () => {
+      if (!currentProfile) return;
+      playSuccessChime();
+      speakEnglishSuccess();
+    });
+
+    document.body.addEventListener('click', function audioUnlock() {
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (window.speechSynthesis) window.speechSynthesis.getVoices();
+    }, { once: false });
+
+    // تحميل الأصوات مسبقاً
+    window.addEventListener('load', () => {
+      if (window.speechSynthesis) window.speechSynthesis.getVoices();
+    });
+
+  })();
+</script>
+</body>
+</html>
