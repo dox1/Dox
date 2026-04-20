@@ -2,552 +2,547 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>NEURO ACCESS · نظام المصادقة الحيوية</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>ECO SMART DZ - لوحة التحكم الذكية</title>
+  <!-- الخطوط والأيقونات -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    /* ===== المتغيرات الأساسية ===== */
     :root {
-      --bg-deep: #020408;
-      --panel-bg: rgba(6, 12, 24, 0.85);
-      --cyan: #00f0ff;
-      --cyan-dim: rgba(0, 240, 255, 0.15);
-      --neon-green: #2eff9e;
-      --text-primary: #eef5ff;
-      --text-dim: #7b93aa;
-      --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.8);
+      --bg: #0a1929;
+      --bg-2: #0f2238;
+      --surface: rgba(255,255,255,0.05);
+      --surface-2: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.10);
+      --text: #e6f1ff;
+      --text-dim: #94a8c4;
+      --primary: #40e0a0;
+      --secondary: #2bbdff;
+      --danger: #ff5577;
+      --warning: #ffb454;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 16px;
     }
-
+    [data-theme="light"] {
+      --bg: #f3f6fb;
+      --bg-2: #e9eef7;
+      --surface: rgba(255,255,255,0.75);
+      --surface-2: rgba(255,255,255,0.9);
+      --border: rgba(10,25,41,0.12);
+      --text: #0a1929;
+      --text-dim: #5a6b85;
+      --shadow: 0 10px 30px rgba(10,25,41,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
     body {
+      font-family: 'Cairo', system-ui, sans-serif;
+      background: radial-gradient(1200px 600px at 80% -10%, rgba(64,224,160,0.18), transparent 60%),
+                  radial-gradient(900px 500px at -10% 110%, rgba(43,189,255,0.18), transparent 60%),
+                  var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      background: radial-gradient(circle at 20% 30%, #0a1428 0%, #010101 90%);
-      font-family: 'Space Grotesk', 'Share Tech Mono', sans-serif;
-      color: var(--text-primary);
-      overflow: hidden;
+      transition: background .3s, color .3s;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+    input, select { font-family: inherit; }
+    .glass, .glass-card {
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; border-radius: 12px; font-weight: 600;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #00121f; transition: transform .15s, box-shadow .2s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(64,224,160,0.35); }
+    .btn-ghost {
+      background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+    }
+    .btn-danger { background: linear-gradient(135deg,#ff5577,#ff8a4c); color: #fff; }
+
+    /* ===== شاشة الدخول ===== */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-card { width: 100%; max-width: 420px; padding: 36px 28px; }
+    .login-logo {
+      width: 72px; height: 72px; border-radius: 20px; margin: 0 auto 16px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: grid; place-items: center; color: #00121f; font-size: 32px;
+    }
+    .login-card h1 { text-align: center; font-size: 24px; margin-bottom: 4px; }
+    .login-card p.sub { text-align: center; color: var(--text-dim); margin-bottom: 24px; font-size: 14px;}
+    .field { margin-bottom: 14px; }
+    .field label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--text-dim); }
+    .field input {
+      width: 100%; padding: 12px 14px; border-radius: 12px;
+      background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border); outline: none; transition: border-color .2s;
+    }
+    .field input:focus { border-color: var(--primary); }
+    .login-btn { width: 100%; justify-content: center; padding: 12px; margin-top: 8px; }
+    .err {
+      display: none; background: rgba(255,85,119,0.12); color: #ff8aa1;
+      border: 1px solid rgba(255,85,119,0.3); padding: 10px; border-radius: 10px;
+      font-size: 13px; margin-bottom: 12px; text-align: center;
+    }
+    .err.show { display: block; }
+    .creds-hint { margin-top: 14px; font-size: 12px; color: var(--text-dim); text-align:center; }
+
+    /* ===== التطبيق الرئيسي ===== */
+    #app { display: none; min-height: 100vh; }
+    .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .sidebar {
+      background: var(--surface); backdrop-filter: blur(14px);
+      border-left: 1px solid var(--border);
+      padding: 22px 16px; display: flex; flex-direction: column; gap: 6px;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 6px 8px 18px; }
+    .brand-logo {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: grid; place-items: center; color: #00121f;
+    }
+    .brand-name { font-weight: 800; font-size: 16px; line-height: 1.1; }
+    .brand-sub { font-size: 11px; color: var(--text-dim); }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 11px 12px;
+      border-radius: 12px; color: var(--text-dim); font-weight: 600; font-size: 14px;
+      transition: background .2s, color .2s;
       position: relative;
-      backdrop-filter: blur(2px);
+    }
+    .nav-item:hover { background: var(--surface-2); color: var(--text); }
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(64,224,160,0.18), rgba(43,189,255,0.18));
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .nav-item i { width: 18px; text-align: center; color: var(--primary); }
+    .nav-item .lock-mini { margin-right: auto; color: var(--warning); font-size: 12px; }
+    .sidebar-footer { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); }
+
+    .main { padding: 22px; min-width: 0; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px;
+    }
+    .topbar h2 { font-size: 22px; }
+    .topbar .meta { color: var(--text-dim); font-size: 13px; }
+    .menu-toggle { display: none; }
+
+    /* ===== الأقسام ===== */
+    .section { display: none; }
+    .section.show { display: block; }
+
+    /* ===== البطاقات والشبكات ===== */
+    .grid { display: grid; gap: 16px; }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .card { padding: 18px; }
+    .kpi { display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; }
+    .kpi .icon {
+      width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(64,224,160,0.2), rgba(43,189,255,0.2));
+      color: var(--primary); font-size: 18px;
+    }
+    .kpi .label { color: var(--text-dim); font-size: 13px; }
+    .kpi .value { font-size: 26px; font-weight: 800; }
+    .kpi .delta { font-size: 12px; color: var(--primary); }
+    .kpi .delta.bad { color: var(--danger); }
+
+    .section-title {
+      display: flex; justify-content: space-between; align-items: center;
+      margin: 22px 0 12px;
+    }
+    .section-title h3 { font-size: 16px; }
+
+    .chart-wrap { position: relative; height: 280px; }
+
+    .alerts { display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto; }
+    .alert-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 10px 12px; border-radius: 12px; background: var(--surface-2);
+      border-right: 3px solid var(--primary);
+    }
+    .alert-item.warn { border-color: var(--warning); }
+    .alert-item.danger { border-color: var(--danger); }
+    .alert-item .ai { width: 32px; height: 32px; border-radius: 10px; background: rgba(64,224,160,0.15); color: var(--primary); display: grid; place-items: center; flex-shrink: 0; }
+    .alert-item.warn .ai { background: rgba(255,180,84,0.15); color: var(--warning);}
+    .alert-item.danger .ai { background: rgba(255,85,119,0.15); color: var(--danger);}
+    .alert-item .at { font-size: 11px; color: var(--text-dim); }
+    .alert-item .am { font-size: 13px; font-weight: 600; }
+
+    .ai-box {
+      padding: 16px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(64,224,160,0.10), rgba(43,189,255,0.10));
+      border: 1px solid var(--border);
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .ai-box .bot { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg,var(--primary),var(--secondary)); color: #00121f; display: grid; place-items: center; flex-shrink: 0; }
+    .ai-box h4 { margin-bottom: 4px; font-size: 14px; }
+    .ai-box p { color: var(--text-dim); font-size: 13px; line-height: 1.7; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: right; padding: 11px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-dim); font-weight: 600; font-size: 12px; }
+    tr:last-child td { border-bottom: none; }
+    .table-wrap { overflow-x: auto; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+      background: rgba(64,224,160,0.15); color: var(--primary);
+    }
+    .pill.warn { background: rgba(255,180,84,0.15); color: var(--warning); }
+    .pill.bad { background: rgba(255,85,119,0.15); color: var(--danger); }
+    .pill.muted { background: var(--surface-2); color: var(--text-dim); }
+
+    .live-big {
+      font-size: 38px; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
     }
 
-    .overlay-noise {
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.02) 0px, transparent 2px, transparent 5px);
-      pointer-events: none;
-      z-index: 1;
-      mix-blend-mode: overlay;
+    /* ===== شاشة القفل ===== */
+    .lock-overlay {
+      position: absolute; inset: 0; background: rgba(10,25,41,0.75);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--radius); z-index: 10;
+    }
+    .lock-content {
+      text-align: center; padding: 24px; max-width: 320px;
+    }
+    .lock-icon { font-size: 48px; color: var(--warning); margin-bottom: 12px; }
+    .lock-content h3 { margin-bottom: 8px; }
+    .lock-content p { color: var(--text-dim); margin-bottom: 20px; }
+    .section-locked { position: relative; }
+
+    /* ===== الإعدادات ===== */
+    .settings-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab-btn {
+      padding: 9px 14px; border-radius: 999px; background: var(--surface-2);
+      border: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text-dim);
+    }
+    .tab-btn.active { color: var(--text); background: linear-gradient(135deg, rgba(64,224,160,0.18), rgba(43,189,255,0.18)); }
+    .settings-pane { display: none; }
+    .settings-pane.show { display: block; }
+
+    .plan-card {
+      padding: 18px; border-radius: 14px; border: 1px solid var(--border);
+      background: var(--surface-2); position: relative;
+    }
+    .plan-card.active { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(64,224,160,0.25); }
+    .plan-card h4 { font-size: 18px; margin-bottom: 4px; }
+    .plan-card .price { font-size: 26px; font-weight: 800; margin: 8px 0; }
+    .plan-card .price small { font-size: 13px; color: var(--text-dim); font-weight: 500; }
+    .plan-card ul { list-style: none; margin: 12px 0; }
+    .plan-card li { padding: 4px 0; font-size: 13px; color: var(--text-dim); }
+    .plan-card li i { color: var(--primary); margin-left: 6px; }
+    .badge-free {
+      position: absolute; top: 12px; left: 12px;
+      background: linear-gradient(135deg,var(--primary),var(--secondary));
+      color: #00121f; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
     }
 
-    .scan-effect {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(180deg, transparent 40%, rgba(0, 240, 255, 0.02) 50%, transparent 60%);
-      background-size: 100% 8px;
-      animation: scanMove 8s linear infinite;
-      pointer-events: none;
-      z-index: 2;
-      opacity: 0.5;
+    .toggle { position: relative; width: 48px; height: 26px; background: var(--surface-2); border-radius: 999px; border: 1px solid var(--border); cursor: pointer; }
+    .toggle::after {
+      content: ''; position: absolute; top: 2px; right: 2px; width: 20px; height: 20px;
+      background: linear-gradient(135deg,var(--primary),var(--secondary));
+      border-radius: 50%; transition: right .2s;
+    }
+    .toggle.on::after { right: calc(100% - 22px); }
+
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .row.between { justify-content: space-between; }
+
+    /* ===== نافذة بريدي موب ===== */
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px;
+    }
+    .modal.show { display: flex; }
+    .modal-card {
+      width: 100%; max-width: 500px; padding: 24px;
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: 24px; box-shadow: var(--shadow);
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .modal-header h3 { display: flex; align-items: center; gap: 8px; }
+    .baridi-badge {
+      background: #0077be; color: white; padding: 2px 10px; border-radius: 999px;
+      font-size: 12px; margin-right: 8px;
+    }
+    .step-indicator {
+      display: flex; justify-content: center; gap: 20px; margin-bottom: 24px;
+    }
+    .step { width: 30px; height: 30px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; color: var(--text-dim); }
+    .step.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #00121f; }
+    .otp-grid { display: flex; gap: 8px; justify-content: center; margin: 16px 0; }
+    .otp-grid input {
+      width: 48px; height: 56px; text-align: center; font-size: 24px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text);
     }
 
-    @keyframes scanMove {
-      0% { background-position-y: 0; }
-      100% { background-position-y: 100%; }
+    /* ===== تجاوب ===== */
+    @media (max-width: 1024px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed; top: 0; right: 0; width: 260px; z-index: 50;
+        transform: translateX(100%); transition: transform .25s;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .menu-toggle { display: inline-flex; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .grid-4, .grid-3 { grid-template-columns: 1fr; }
+      .main { padding: 14px; }
+      .topbar h2 { font-size: 18px; }
+      .live-big { font-size: 28px; }
     }
 
-    /* شبكة هولوغرافية */
-    #hologrid {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 3;
-      opacity: 0;
-      transition: opacity 0.3s;
+    .backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40;
     }
-
-    .scanning #hologrid {
-      opacity: 0.35;
-    }
-
-    .main-container {
-      position: relative;
-      z-index: 5;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5vh 2vw;
-    }
-
-    .core-panel {
-      width: 95vw;
-      max-width: 1400px;
-      height: 92vh;
-      background: var(--panel-bg);
-      backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid rgba(0, 240, 255, 0.25);
-      border-radius: 3vh;
-      box-shadow: var(--shadow-heavy), 0 0 0 1px rgba(0, 240, 255, 0.1) inset;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5vh 2.5vw;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
-      background: linear-gradient(90deg, rgba(0, 240, 255, 0.05) 0%, transparent 50%);
-    }
-
-    .system-title {
-      display: flex;
-      align-items: center;
-      gap: 1vw;
-    }
-
-    .pulse-dot {
-      width: 1.8vh;
-      height: 1.8vh;
-      background: var(--neon-green);
-      border-radius: 50%;
-      box-shadow: 0 0 2vh var(--neon-green);
-      animation: pulseGreen 1.2s infinite;
-    }
-
-    @keyframes pulseGreen {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-
-    .system-title h1 {
-      font-weight: 600;
-      font-size: clamp(1.2rem, 2vw, 1.8rem);
-      text-transform: uppercase;
-      background: linear-gradient(135deg, #fff, var(--cyan));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: 0.3vw;
-    }
-
-    .status-tags {
-      display: flex;
-      gap: 1.5vw;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: clamp(0.8rem, 1vw, 1rem);
-    }
-
-    .time-display {
-      color: var(--cyan);
-      font-weight: 500;
-    }
-
-    .dashboard {
-      display: grid;
-      grid-template-columns: 1fr 1.6fr;
-      flex: 1;
-      min-height: 0;
-    }
-
-    .scanner-section {
-      padding: 2vh 1.5vw;
-      border-right: 1px solid rgba(0, 240, 255, 0.15);
-      background: radial-gradient(circle at 50% 40%, rgba(0, 240, 255, 0.03) 0%, transparent 70%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .biometric-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .scanner-ring {
-      position: relative;
-      width: min(28vh, 28vw);
-      height: min(28vh, 28vw);
-      margin: 1vh auto;
-    }
-
-    .outer-ring {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 2px solid rgba(0, 240, 255, 0.3);
-      box-shadow: 0 0 4vh rgba(0, 240, 255, 0.1) inset;
-      animation: rotateSlow 20s linear infinite;
-    }
-
-    .middle-ring {
-      position: absolute;
-      inset: 2vh;
-      border-radius: 50%;
-      border: 1px dashed rgba(0, 240, 255, 0.5);
-      animation: rotateReverse 15s linear infinite;
-    }
-
-    .inner-ring {
-      position: absolute;
-      inset: 4vh;
-      border-radius: 50%;
-      border: 1px solid rgba(46, 255, 158, 0.4);
-      box-shadow: 0 0 3vh rgba(46, 255, 158, 0.2);
-    }
-
-    @keyframes rotateSlow { 100% { transform: rotate(360deg); } }
-    @keyframes rotateReverse { 100% { transform: rotate(-360deg); } }
-
-    .fingerprint-sensor {
-      position: absolute;
-      inset: 2.5vh;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(0, 240, 255, 0.2), transparent 60%);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid rgba(0, 240, 255, 0.6);
-      box-shadow: 0 0 5vh rgba(0, 240, 255, 0.2);
-      overflow: hidden;
-    }
-
-    .sensor-glow {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 50% 50%, rgba(46, 255, 158, 0.3), transparent);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .scanning .sensor-glow { opacity: 1; }
-
-    .fingerprint-icon {
-      font-size: 8vh;
-      color: rgba(0, 240, 255, 0.8);
-      text-shadow: 0 0 3vh var(--cyan);
-      z-index: 3;
-    }
-
-    .scan-beam {
-      position: absolute;
-      top: -20%;
-      left: -10%;
-      width: 120%;
-      height: 20%;
-      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.8), transparent);
-      filter: blur(6px);
-      transform: rotate(45deg);
-      animation: beamSweep 2.5s ease-in-out infinite;
-      opacity: 0;
-      z-index: 5;
-    }
-
-    .scanning .scan-beam { opacity: 0.8; }
-
-    @keyframes beamSweep {
-      0% { transform: translateX(-150%) rotate(45deg); }
-      100% { transform: translateX(150%) rotate(45deg); }
-    }
-
-    canvas#waveform {
-      width: 90%;
-      height: 6vh;
-      margin-top: 1vh;
-      opacity: 0.6;
-    }
-
-    .scan-status {
-      text-align: center;
-      font-family: 'Share Tech Mono', monospace;
-      padding: 1.5vh 1vw;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 2vh;
-      border: 1px solid rgba(0, 240, 255, 0.2);
-      backdrop-filter: blur(5px);
-      margin-top: 1vh;
-    }
-
-    .progress-bar-bg {
-      height: 1vh;
-      background: rgba(255,255,255,0.05);
-      border-radius: 1vh;
-      overflow: hidden;
-      margin: 1.5vh 0 0.5vh;
-    }
-
-    .progress-fill {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, var(--cyan), var(--neon-green));
-      box-shadow: 0 0 2vh var(--cyan);
-      transition: width 0.1s linear;
-    }
-
-    .identity-section {
-      padding: 2vh 2vw;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .identity-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5vh;
-    }
-
-    .glitch-text {
-      font-size: clamp(1.8rem, 3vw, 2.5rem);
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--text-primary);
-      text-shadow: 0.05em 0 0 #0ff, -0.05em -0.025em 0 #f0f;
-      animation: glitchText 3s infinite;
-    }
-
-    @keyframes glitchText {
-      0%,100% { text-shadow: 0.05em 0 0 #0ff, -0.05em -0.025em 0 #f0f; }
-      25% { text-shadow: -0.05em -0.025em 0 #0ff, 0.025em 0.05em 0 #f0f; }
-      50% { text-shadow: 0.025em 0.05em 0 #0ff, 0.05em 0 0 #f0f; }
-      75% { text-shadow: -0.025em 0 0 #0ff, -0.025em -0.025em 0 #f0f; }
-    }
-
-    .clearance-badge {
-      background: rgba(0, 240, 255, 0.1);
-      padding: 0.8vh 1.5vw;
-      border-radius: 5vh;
-      border: 1px solid var(--cyan);
-      font-weight: 500;
-      font-size: clamp(0.8rem, 1vw, 1rem);
-    }
-
-    .profile-card {
-      display: grid;
-      grid-template-columns: 0.8fr 2fr;
-      gap: 1.5vw;
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 3vh;
-      padding: 2vh 1.5vw;
-      border: 1px solid rgba(0, 240, 255, 0.2);
-      backdrop-filter: blur(8px);
-      opacity: 0;
-      transform: translateY(30px) scale(0.98);
-      transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .profile-card.visible {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
-    .avatar-container {
-      position: relative;
-      border-radius: 2.5vh;
-      overflow: hidden;
-      border: 1px solid rgba(0, 240, 255, 0.4);
-      box-shadow: 0 0 3vh rgba(0, 240, 255, 0.1);
-      aspect-ratio: 1/1;
-    }
-
-    .avatar-img {
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center;
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1vh 1vw;
-    }
-
-    .info-field {
-      background: rgba(0, 20, 40, 0.5);
-      border: 1px solid rgba(0, 240, 255, 0.15);
-      border-radius: 1.8vh;
-      padding: 1vh 1.2vw;
-    }
-
-    .info-label {
-      font-size: clamp(0.6rem, 0.9vw, 0.8rem);
-      text-transform: uppercase;
-      color: var(--text-dim);
-      letter-spacing: 0.1vw;
-    }
-
-    .info-value {
-      font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-      font-weight: 500;
-      color: #fff;
-    }
-
-    .action-bar {
-      margin-top: 2vh;
-      display: flex;
-      gap: 1.5vw;
-      justify-content: flex-end;
-    }
-
-    .cyber-button {
-      background: transparent;
-      border: 1.5px solid var(--cyan);
-      color: var(--cyan);
-      padding: 1.2vh 2vw;
-      border-radius: 8vh;
-      font-weight: 600;
-      letter-spacing: 0.2vw;
-      text-transform: uppercase;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      transition: 0.2s;
-      box-shadow: 0 0 2vh rgba(0, 240, 255, 0.1);
-      font-family: 'Share Tech Mono', monospace;
-      font-size: clamp(0.8rem, 1vw, 1rem);
-    }
-
-    .cyber-button:hover {
-      background: var(--cyan);
-      color: #000;
-      box-shadow: 0 0 3vh var(--cyan);
-    }
-
-    .startup-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(1, 4, 9, 0.95);
-      backdrop-filter: blur(15px);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.4s;
-    }
-
-    .startup-modal {
-      max-width: 90vw;
-      width: 500px;
-      background: var(--panel-bg);
-      border: 1px solid var(--cyan);
-      border-radius: 5vh;
-      padding: 3vh 4vw;
-      text-align: center;
-      box-shadow: 0 0 10vh rgba(0, 240, 255, 0.2);
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* إخفاء قسم قاعدة البيانات */
-    .database-section {
-      display: none;
-    }
-
-    @media (max-width: 800px) {
-      .dashboard { grid-template-columns: 1fr; }
-      .scanner-section { border-right: none; border-bottom: 1px solid var(--cyan); }
-      .profile-card { grid-template-columns: 1fr; }
-      .avatar-container { max-width: 200px; margin: 0 auto; }
-    }
+    .backdrop.show { display: block; }
   </style>
 </head>
 <body>
 
-<canvas id="hologrid"></canvas>
-<div class="overlay-noise"></div>
-<div class="scan-effect"></div>
-
-<div class="startup-overlay" id="startupOverlay">
-  <div class="startup-modal">
-    <div style="font-size: 8vh; margin-bottom: 2vh;">⬚⬚⬚</div>
-    <h2 style="font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 2vh;">NEURO ACCESS</h2>
-    <p style="color: #aac8e4; margin-bottom: 3vh;">نظام مصادقة حيوية · استجابة صوتية · ترتيب ثابت</p>
-    <button class="cyber-button" id="initiateBtn" style="font-size: 1.3rem; padding: 1.5vh 3vw;">بدء جلسة آمنة</button>
+<!-- شاشة الدخول -->
+<div id="login-screen">
+  <div class="login-card glass">
+    <div class="login-logo"><i class="fas fa-leaf"></i></div>
+    <h1>ECO SMART DZ</h1>
+    <p class="sub">منصة المراقبة الذكية للماء والكهرباء</p>
+    <div id="login-err" class="err">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+    <form id="login-form">
+      <div class="field"><label>اسم المستخدم</label><input type="text" id="login-user" placeholder="admin" autocomplete="off" dir="ltr"></div>
+      <div class="field"><label>كلمة المرور</label><input type="password" id="login-pass" placeholder="ECO2026@DZ" autocomplete="off" dir="ltr"></div>
+      <button type="submit" class="btn login-btn"> تسجيل الدخول <i class="fas fa-arrow-left"></i></button>
+    </form>
+    <div class="creds-hint">تجريبي: admin / ECO2026@DZ</div>
   </div>
 </div>
 
-<div class="main-container">
-  <div class="core-panel">
-    <div class="header-bar">
-      <div class="system-title">
-        <span class="pulse-dot"></span>
-        <h1>NEURO·ACCESS</h1>
+<!-- التطبيق الرئيسي -->
+<div id="app">
+  <div class="layout">
+    <!-- القائمة الجانبية -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo"><i class="fas fa-droplet"></i></div>
+        <div>
+          <div class="brand-name">ECO SMART DZ</div>
+          <div class="brand-sub">لوحة التحكم الذكية</div>
+        </div>
       </div>
-      <div class="status-tags">
-        <span>⚡ SIGMA-7</span>
-        <span class="time-display" id="liveTime">--:--:--</span>
+      <nav>
+        <div class="nav-item active" data-section="dashboard"><i class="fas fa-chart-pie"></i> لوحة التحكم</div>
+        <div class="nav-item" data-section="live"><i class="fas fa-eye"></i> المراقبة الحية</div>
+        <div class="nav-item locked" data-section="analytics"><i class="fas fa-chart-line"></i> التحليلات المتقدمة <i class="fas fa-lock lock-mini"></i></div>
+        <div class="nav-item locked" data-section="devices"><i class="fas fa-microchip"></i> إدارة الأجهزة <i class="fas fa-lock lock-mini"></i></div>
+        <div class="nav-item locked" data-section="reports"><i class="fas fa-file-alt"></i> التقارير الدورية <i class="fas fa-lock lock-mini"></i></div>
+        <div class="nav-item" data-section="settings"><i class="fas fa-sliders-h"></i> الإعدادات</div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="nav-item" id="logout-btn"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</div>
+      </div>
+    </aside>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h2 id="pageTitle">لوحة التحكم</h2>
+          <span class="meta" id="pageMeta">نظرة عامة على الاستهلاك الحالي</span>
+        </div>
+        <div class="row">
+          <span class="pill"><i class="fas fa-circle"></i> النظام نشط</span>
+          <button class="btn btn-ghost menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <!-- ===== القسم: لوحة التحكم ===== -->
+      <section id="sec-dashboard" class="section show">
+        <div class="grid grid-4">
+          <div class="glass-card card kpi"><div class="icon"><i class="fas fa-water"></i></div><span class="label">استهلاك الماء اللحظي</span><span class="value"><span id="kpi-water">0</span> لتر/د</span><span id="kpi-water-delta" class="delta">+0% مقارنة بالأمس</span></div>
+          <div class="glass-card card kpi"><div class="icon"><i class="fas fa-bolt"></i></div><span class="label">استهلاك الكهرباء</span><span class="value"><span id="kpi-power">0</span> ك.و/س</span><span id="kpi-power-delta" class="delta">+0%</span></div>
+          <div class="glass-card card kpi"><div class="icon"><i class="fas fa-piggy-bank"></i></div><span class="label">نسبة التوفير</span><span class="value"><span id="kpi-saving">0</span>%</span><span class="delta">شهر التوفير الحالي</span></div>
+          <div class="glass-card card kpi"><div class="icon"><i class="fas fa-exclamation-triangle"></i></div><span class="label">حالة التسرب</span><span class="value"><span id="kpi-leak">0</span>%</span><span id="kpi-leak-delta" class="delta">طبيعي</span></div>
+        </div>
+        <div class="grid grid-2" style="margin-top:20px">
+          <div class="glass-card card"><div class="section-title"><h3>الاستهلاك خلال 24 ساعة</h3></div><div class="chart-wrap"><canvas id="chart-24h"></canvas></div></div>
+          <div class="glass-card card"><div class="section-title"><h3>أحدث التنبيهات</h3><button class="btn btn-ghost" id="simulate-alert"><i class="fas fa-bell"></i> محاكاة تنبيه</button></div><div class="alerts" id="alerts-list"></div></div>
+        </div>
+        <div class="ai-box" style="margin-top:16px"><div class="bot"><i class="fas fa-robot"></i></div><div><h4>تحليلات الذكاء الاصطناعي</h4><p id="ai-insight">جاري تحليل البيانات...</p></div></div>
+      </section>
+
+      <!-- ===== القسم: المراقبة الحية ===== -->
+      <section id="sec-live" class="section">
+        <div class="grid grid-2">
+          <div class="glass-card card"><div class="section-title"><h3><i class="fas fa-water"></i> عداد الماء</h3><span class="pill" id="water-status">طبيعي</span></div><div class="live-big" style="margin:16px 0"><span id="live-water">0</span> لتر/دقيقة</div><div class="chart-wrap" style="height:180px"><canvas id="chart-water-d"></canvas></div></div>
+          <div class="glass-card card"><div class="section-title"><h3><i class="fas fa-bolt"></i> عداد الكهرباء</h3><span class="pill" id="power-status">طبيعي</span></div><div class="live-big" style="margin:16px 0"><span id="live-power">0</span> كيلوواط/ساعة</div><div class="chart-wrap" style="height:180px"><canvas id="chart-power-d"></canvas></div></div>
+        </div>
+        <div class="glass-card card" style="margin-top:16px"><div class="section-title"><h3>حالة الحساسات</h3><button class="btn btn-ghost" id="refresh-sensors"><i class="fas fa-sync-alt"></i> تحديث</button></div><div class="table-wrap"><table><thead><tr><th>الحساس</th><th>القراءة</th><th>الحالة</th><th>آخر تحديث</th></tr></thead><tbody id="sensors-tbody"></tbody></table></div></div>
+      </section>
+
+      <!-- ===== القسم: التحليلات المتقدمة (مقفل) ===== -->
+      <section id="sec-analytics" class="section section-locked">
+        <div id="analytics-locked" class="lock-overlay" style="display:flex;">
+          <div class="lock-content"><div class="lock-icon"><i class="fas fa-lock"></i></div><h3>هذه الميزة مقفلة</h3><p>التحليلات المتقدمة متوفرة للمشتركين فقط. اشترك الآن عبر البريدي موب وابدأ بالشهر الأول مجاناً.</p><button class="btn" onclick="goToSubscription()"><i class="fas fa-crown"></i> اشترك الآن</button></div>
+        </div>
+        <div id="analytics-content" style="display:none;">
+          <div class="section-title"><h3>التحليلات المتقدمة</h3><select id="analytics-period" class="pill"><option>يومي</option><option>أسبوعي</option><option selected>شهري</option></select></div>
+          <div class="grid grid-2">
+            <div class="glass-card card"><div class="section-title"><h3>الاستهلاك الأسبوعي</h3></div><div class="chart-wrap"><canvas id="chart-bar"></canvas></div></div>
+            <div class="glass-card card"><div class="section-title"><h3>المقارنة مع الفترة السابقة</h3></div><div class="chart-wrap"><canvas id="chart-radar"></canvas></div></div>
+            <div class="glass-card card"><div class="section-title"><h3>توزيع الاستهلاك</h3></div><div class="chart-wrap"><canvas id="chart-pie"></canvas></div></div>
+            <div class="glass-card card"><div class="section-title"><h3>توقعات الذكاء الاصطناعي للشهر القادم</h3></div><p id="ai-forecast" style="padding:12px">جاري الحساب...</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== القسم: إدارة الأجهزة (مقفل) ===== -->
+      <section id="sec-devices" class="section section-locked">
+        <div id="devices-locked" class="lock-overlay" style="display:flex;">
+          <div class="lock-content"><div class="lock-icon"><i class="fas fa-lock"></i></div><h3>هذه الميزة مقفلة</h3><p>إدارة الأجهزة المتصلة متوفرة للمشتركين فقط. اشترك الآن وتمتع بمراقبة كاملة لجميع حساساتك.</p><button class="btn" onclick="goToSubscription()"><i class="fas fa-crown"></i> اشترك الآن</button></div>
+        </div>
+        <div id="devices-content" style="display:none;">
+          <div class="grid grid-3" style="margin-bottom:16px">
+            <div class="glass-card card"><span class="label">الأجهزة النشطة</span><span class="live-big" id="devActive">8</span></div>
+            <div class="glass-card card"><span class="label">متوسط زمن الاستجابة</span><span class="live-big" id="devLatency">42 ms</span></div>
+            <div class="glass-card card"><span class="label">جودة الاتصال</span><span class="live-big" id="devSignal">98%</span></div>
+          </div>
+          <div class="glass-card card"><div class="section-title"><h3>الأجهزة المتصلة</h3><button class="btn btn-ghost" id="add-device"><i class="fas fa-plus"></i> إضافة جهاز</button></div><div class="table-wrap"><table><thead><tr><th>الاسم</th><th>النوع</th><th>الحالة</th><th>آخر قراءة</th><th>إجراءات</th></tr></thead><tbody id="devices-tbody"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <!-- ===== القسم: التقارير (مقفل) ===== -->
+      <section id="sec-reports" class="section section-locked">
+        <div id="reports-locked" class="lock-overlay" style="display:flex;">
+          <div class="lock-content"><div class="lock-icon"><i class="fas fa-lock"></i></div><h3>هذه الميزة مقفلة</h3><p>التقارير الدورية والتصدير إلى PDF متوفرة للمشتركين فقط. اشترك الآن واحصل على تقارير شهرية مفصلة.</p><button class="btn" onclick="goToSubscription()"><i class="fas fa-crown"></i> اشترك الآن</button></div>
+        </div>
+        <div id="reports-content" style="display:none;">
+          <div class="grid grid-3" style="margin-bottom:16px">
+            <div class="glass-card card"><i class="fas fa-file-pdf fa-2x" style="color:var(--primary)"></i><h4 style="margin:8px 0">التقرير اليومي</h4><p>ملخص استهلاك اليوم الحالي</p><button class="btn report-view" data-r="day">عرض</button></div>
+            <div class="glass-card card"><i class="fas fa-file-excel fa-2x" style="color:var(--primary)"></i><h4 style="margin:8px 0">التقرير الأسبوعي</h4><p>تحليل أسبوعي شامل</p><button class="btn report-view" data-r="week">عرض</button></div>
+            <div class="glass-card card"><i class="fas fa-file-invoice fa-2x" style="color:var(--primary)"></i><h4 style="margin:8px 0">التقرير الشهري</h4><p>إجمالي الشهر مع التكاليف</p><button class="btn report-view" data-r="month">عرض</button></div>
+          </div>
+          <div class="glass-card card"><div class="section-title"><h3>ملخص الشهر الحالي</h3><button class="btn" id="export-pdf"><i class="fas fa-download"></i> تصدير PDF</button></div><div class="table-wrap"><table><thead><tr><th>الأسبوع</th><th>الماء (لتر)</th><th>الكهرباء (ك.و.س)</th><th>التكلفة (دج)</th><th>الترشيد</th></tr></thead><tbody id="month-tbody"></tbody></table></div></div>
+          <div class="glass-card card" style="margin-top:16px"><div class="section-title"><h3>اتجاه الاستهلاك الشهري</h3></div><div class="chart-wrap" style="height:200px"><canvas id="chart-trend"></canvas></div></div>
+          <div class="glass-card card" style="margin-top:16px"><div class="section-title"><h3>تقارير سابقة</h3></div><div class="table-wrap"><table><thead><tr><th>الشهر</th><th>إجمالي الماء</th><th>إجمالي الكهرباء</th><th>التكلفة</th><th>تحميل</th></tr></thead><tbody id="prev-tbody"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <!-- ===== القسم: الإعدادات ===== -->
+      <section id="sec-settings" class="section">
+        <div class="settings-tabs">
+          <button class="tab-btn active" data-tab="sub">الاشتراك</button>
+          <button class="tab-btn" data-tab="appearance">المظهر</button>
+          <button class="tab-btn" data-tab="thresholds">حدود التنبيهات</button>
+          <button class="tab-btn" data-tab="profile">الملف الشخصي</button>
+        </div>
+        <!-- تبويب الاشتراك -->
+        <div class="settings-pane show" data-pane="sub">
+          <div style="margin-bottom:16px; padding:12px; background:rgba(0,119,190,0.15); border-radius:12px; display:flex; align-items:center; gap:12px;">
+            <i class="fas fa-mobile-alt" style="font-size:32px; color:#0077be;"></i>
+            <div><strong>الدفع عبر البريدي موب</strong><br><span style="color:var(--text-dim);">طريقة الدفع المعتمدة • آمن • فوري • بدون عمولة بنكية</span></div>
+          </div>
+          <div class="grid grid-2">
+            <div class="plan-card" id="planMonthly"><span class="badge-free">الشهر الأول مجاني</span><h4>الخطة الشهرية</h4><div class="price">1,200 دج <small>/شهر</small></div><ul><li><i class="fas fa-check"></i> مراقبة لحظية</li><li><i class="fas fa-check"></i> تنبيهات فورية</li><li><i class="fas fa-check"></i> تقارير شهرية</li></ul><button class="btn" onclick="openPayment('monthly')"><i class="fas fa-credit-card"></i> ادفع عبر البريدي موب</button></div>
+            <div class="plan-card" id="planYearly"><span class="badge-free">الشهر الأول مجاني</span><h4>الخطة السنوية <small>وفر 20%</small></h4><div class="price">12,000 دج <small>/سنة</small></div><ul><li><i class="fas fa-check"></i> كل ميزات الشهرية</li><li><i class="fas fa-check"></i> دعم فني أولوية</li><li><i class="fas fa-check"></i> تحليلات AI متقدمة</li></ul><button class="btn" onclick="openPayment('yearly')"><i class="fas fa-credit-card"></i> ادفع عبر البريدي موب</button></div>
+          </div>
+          <div class="glass-card card" style="margin-top:16px"><h4>اشتراكك الحالي</h4><div id="subStatusBody">لا يوجد اشتراك نشط حالياً. الأقسام المتقدمة (التحليلات، الأجهزة، التقارير) مقفلة.<br><span class="pill warn">غير مشترك</span></div></div>
+        </div>
+        <!-- تبويب المظهر -->
+        <div class="settings-pane" data-pane="appearance">
+          <div class="glass-card card"><div class="row between"><span><i class="fas fa-moon"></i> الثيم</span><span class="toggle on" id="theme-toggle" onclick="toggleTheme(!document.documentElement.getAttribute('data-theme')||document.documentElement.getAttribute('data-theme')!=='light')"></span></div></div>
+        </div>
+        <!-- تبويب حدود التنبيهات -->
+        <div class="settings-pane" data-pane="thresholds">
+          <div class="glass-card card">
+            <div class="field"><label>حد الماء الأقصى (لتر/د)</label><input type="number" id="thr-water" value="60"></div>
+            <div class="field"><label>حد الكهرباء الأقصى (ك.و.س)</label><input type="number" id="thr-power" value="28"></div>
+            <div class="field"><label>حساسية كشف التسرب (%)</label><input type="number" id="thr-leak" value="15"></div>
+            <button class="btn" onclick="saveThresholds()">حفظ الإعدادات</button>
+          </div>
+        </div>
+        <!-- تبويب الملف الشخصي -->
+        <div class="settings-pane" data-pane="profile">
+          <div class="glass-card card">
+            <div class="field"><label>الاسم الكامل</label><input value="المدير العام"></div>
+            <div class="field"><label>البريد الإلكتروني</label><input value="admin@ecosmart.dz"></div>
+            <button class="btn" onclick="alert('تم تحديث الملف الشخصي ✅')">تحديث الملف</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+</div>
+
+<!-- نافذة الدفع عبر بريدي موب -->
+<div class="modal" id="payModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fas fa-mobile-alt" style="color:#0077be;"></i> الدفع عبر <span class="baridi-badge">بريدي موب</span></h3>
+      <button onclick="closePayment()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="step-indicator">
+      <span class="step active" id="ps1">1</span>
+      <span class="step" id="ps2">2</span>
+      <span class="step" id="ps3">3</span>
+    </div>
+    <!-- الخطوة 1: معلومات الحساب -->
+    <div id="payStep1">
+      <p style="margin-bottom:16px;">الخطة: <strong id="payPlanName">—</strong> • المبلغ: <strong id="payAmount">—</strong> <span class="badge-free" style="position:static; margin-right:8px;">الشهر الأول مجاني 🎁</span></p>
+      <div class="field"><label>رقم الحساب البريدي (CCP / RIP)</label><input type="text" id="payCcp" placeholder="مثال: 1234567890"></div>
+      <div class="field"><label>رقم الهاتف المرتبط بالبريدي موب</label><input type="tel" id="payPhone" placeholder="مثال: 0555123456"></div>
+      <button class="btn" style="width:100%;" onclick="payNext1()">متابعة <i class="fas fa-arrow-left"></i></button>
+    </div>
+    <!-- الخطوة 2: رمز التحقق -->
+    <div id="payStep2" style="display:none;">
+      <p style="text-align:center;">تم إرسال رمز التحقق إلى <span id="payPhoneEcho">—</span></p>
+      <div class="otp-grid" id="otpGrid">
+        <input type="text" maxlength="1" inputmode="numeric"><input type="text" maxlength="1" inputmode="numeric"><input type="text" maxlength="1" inputmode="numeric">
+        <input type="text" maxlength="1" inputmode="numeric"><input type="text" maxlength="1" inputmode="numeric"><input type="text" maxlength="1" inputmode="numeric">
+      </div>
+      <p style="font-size:12px; color:var(--text-dim); text-align:center;">رمز تجريبي للمحاكاة: 123456</p>
+      <div class="row" style="justify-content:space-between; margin-top:20px;">
+        <button class="btn-ghost btn" onclick="payBack()">رجوع</button>
+        <button class="btn" onclick="payConfirm()">تأكيد الدفع</button>
       </div>
     </div>
-
-    <div class="dashboard">
-      <div class="scanner-section">
-        <div class="biometric-area">
-          <div class="scanner-ring" id="scannerRing">
-            <div class="outer-ring"></div>
-            <div class="middle-ring"></div>
-            <div class="inner-ring"></div>
-            <div class="fingerprint-sensor" id="fingerprintSensor">
-              <div class="sensor-glow"></div>
-              <div class="scan-beam"></div>
-              <div class="fingerprint-icon">⌾</div>
-            </div>
-          </div>
-          <canvas id="waveform" width="300" height="60"></canvas>
-        </div>
-
-        <div class="scan-status">
-          <div id="scanStateText">جاهز · اضغط المستشعر</div>
-          <div class="progress-bar-bg">
-            <div class="progress-fill" id="scanProgressFill"></div>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span id="progressPercent">0%</span>
-            <span id="scanDetail">انتظار</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="identity-section">
-        <div class="identity-header">
-          <div class="glitch-text">IDENTITY</div>
-          <div class="clearance-badge">CLEARANCE 5</div>
-        </div>
-
-        <div class="profile-card" id="profileCard">
-          <div class="avatar-container">
-            <div class="avatar-img" id="avatarImage"></div>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 1vh;">
-            <div style="font-size: clamp(1.5rem, 2.5vw, 2.2rem); font-weight: 700;" id="fullNameDisplay">---- ----</div>
-            <div class="info-grid">
-              <div class="info-field"><div class="info-label">الاسم الأول</div><div class="info-value" id="firstNameVal">---</div></div>
-              <div class="info-field"><div class="info-label">اللقب</div><div class="info-value" id="lastNameVal">---</div></div>
-              <div class="info-field"><div class="info-label">تاريخ الميلاد</div><div class="info-value" id="birthVal">----</div></div>
-              <div class="info-field"><div class="info-label">المنظمة</div><div class="info-value" id="orgVal">---</div></div>
-              <div class="info-field"><div class="info-label">الإقامة</div><div class="info-value" id="addressVal">---</div></div>
-              <div class="info-field"><div class="info-label">الحالة</div><div class="info-value" id="statusVal">غير مصادق</div></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="action-bar">
-          <button class="cyber-button" id="rescanBtn">إعادة مسح</button>
-          <button class="cyber-button" id="verifyBtn">تحقق متقدم</button>
-        </div>
-      </div>
+    <!-- الخطوة 3: نجاح -->
+    <div id="payStep3" style="display:none; text-align:center;">
+      <i class="fas fa-check-circle" style="font-size:48px; color:var(--primary); margin:16px 0;"></i>
+      <h3>تم الدفع بنجاح!</h3>
+      <p>تم تفعيل اشتراكك، وتم فتح جميع الأقسام المتقدمة.</p>
+      <p style="margin:12px 0;">رقم العملية: <strong id="payTxId">—</strong><br>الخطة: <span id="payDoneName">—</span></p>
+      <button class="btn" style="width:100%;" onclick="closePayment(); setSection('dashboard');">ابدأ الاستخدام</button>
     </div>
   </div>
 </div>
@@ -556,333 +551,256 @@
   (function(){
     "use strict";
 
-    // ---------- قاعدة بيانات ثابتة للأشخاص (مرتبة) ----------
-    const subjects = [
-      {
-        id: 'SUB-001',
-        fullName: 'Mohamed kaddouri',
-        firstName: 'محمد',
-        lastName: 'قدوري',
-        birth: '2006-03-21',
-        org: 'الأمن السيبيراني ',
-        address: 'الخيثر',
-        status: 'تلميذ حاليا في ثانوية مفدي زكرياء ',
-        avatar: 'https://i.postimg.cc/5tGx7gWX/quality_restoration_20251212123329264.jpg',
-      },
-      {
-        id: 'SUB-002',
-        fullName: 'علالي محمد',
-        firstName: 'محمد',
-        lastName: 'علالي',
-        birth: '1997-09/12',
-        org: 'جامعة الأمير عبد القادر للعلوم الإسلامية المتواجدة على مستوى قسطينة',
-        address: 'الخيثر',
-        status: 'استاذ شريعة في بلدية الخيثر على مستوى ثانوية مفدي زكرياء',
-        avatar: 'https://i.postimg.cc/C52LFg6P/1776114231912.png',
-      },
-      {
-        id: 'SUB-003',
-        fullName: 'عبداللاوي سفيان',
-        firstName: 'سفيان',
-        lastName: 'عبداللاوي',
-        birth: 'غير معروف',
-        org: '',
-        address: 'بلدية الخيثر',
-        status: 'استاذ شريعة في بلدية الخيثر على مستوى ثانوية مفدي زكرياء',
-        avatar: '',
-      },
-      {
-        id: 'SUB-004',
-        fullName: 'سلمى ناصر القحطاني',
-        firstName: 'سلمى',
-        lastName: 'القحطاني',
-        birth: '2003-07-19',
-        org: 'أكاديمية نايف للأمن الوطني',
-        address: 'الرياض · الملز',
-        status: 'متدربة · تصريح محدود',
-        avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+    // ====== المصادقة ======
+    const CRED = { user: 'admin', pass: 'ECO2026@DZ' };
+    const loginScreen = document.getElementById('login-screen');
+    const app = document.getElementById('app');
+
+    function showApp() { loginScreen.style.display = 'none'; app.style.display = 'block'; boot(); }
+    function showLogin() { loginScreen.style.display = 'flex'; app.style.display = 'none'; }
+    if (sessionStorage.getItem('eco_auth') === '1') showApp();
+
+    document.getElementById('login-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value;
+      if (u === CRED.user && p === CRED.pass) { sessionStorage.setItem('eco_auth', '1'); showApp(); }
+      else { document.getElementById('login-err').classList.add('show'); }
+    });
+
+    function logout() { sessionStorage.removeItem('eco_auth'); location.reload(); }
+    document.getElementById('logout-btn').addEventListener('click', logout);
+
+    // ====== الحالة العامة ======
+    const state = {
+      water: 35, power: 18, leak: 5, saving: 22,
+      alerts: [
+        { type: 'ok', msg: 'تم تحديث برنامج الحساسات', time: 'منذ 5د' },
+        { type: 'warn', msg: 'ارتفاع طفيف في استهلاك الكهرباء', time: 'منذ 15د' },
+        { type: 'danger', msg: 'احتمال تسرب في الحمام الرئيسي', time: 'منذ 1س' },
+      ],
+      thr: { water: 60, power: 28, leak: 15 }
+    };
+    const LOCKED_SECTIONS = ['analytics', 'devices', 'reports'];
+    const charts = {};
+
+    function rand(min, max) { return +(Math.random() * (max - min) + min).toFixed(1); }
+    function fmtTime() { const d = new Date(); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
+
+    function isSubscribed() { return sessionStorage.getItem('eco_sub') === '1'; }
+
+    function applyLockState() {
+      const subbed = isSubscribed();
+      LOCKED_SECTIONS.forEach(s => {
+        const lock = document.getElementById(s + '-locked');
+        const content = document.getElementById(s + '-content');
+        if (lock && content) { lock.style.display = subbed ? 'none' : 'flex'; content.style.display = subbed ? 'block' : 'none'; }
+        const nav = document.querySelector(`.nav-item[data-section="${s}"]`);
+        if (nav) { nav.classList.toggle('locked', !subbed); const lk = nav.querySelector('.lock-mini'); if(lk) lk.style.display = subbed ? 'none' : 'inline'; }
+      });
+      const body = document.getElementById('subStatusBody');
+      if (body) {
+        if (subbed) {
+          const plan = sessionStorage.getItem('eco_plan') || 'monthly';
+          body.innerHTML = `الخطة الحالية: ${plan==='yearly'?'سنوية':'شهرية'}<br>المدة المتبقية: ${plan==='yearly'?'312 يوماً':'27 يوماً'}<br>طريقة الدفع: بريدي موب<br><span class="pill">اشتراك نشط</span> <button class="btn-ghost btn" style="margin-right:8px;" onclick="cancelSub()">إلغاء</button>`;
+        } else {
+          body.innerHTML = `لا يوجد اشتراك نشط حالياً. الأقسام المتقدمة (التحليلات، الأجهزة، التقارير) مقفلة.<br><span class="pill warn">غير مشترك</span>`;
+        }
       }
-    ];
-
-    // عداد للترتيب الثابت
-    let scanCounter = 0; // يبدأ من 0 (الشخص الأول)
-
-    // ---------- نظام الصوت ----------
-    let audioCtx = null;
-    
-    function initAudio() {
-      if (audioCtx) return;
-      try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-      } catch(e) {}
     }
 
-    function playScanBeep() {
-      if (!audioCtx) return;
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.start(); osc.stop(now + 0.15);
-    }
+    // ====== التنقل ======
+    const titles = { dashboard: 'لوحة التحكم', live: 'المراقبة الحية', analytics: 'التحليلات المتقدمة', devices: 'إدارة الأجهزة', reports: 'التقارير الدورية', settings: 'الإعدادات' };
+    const metas = { dashboard: 'نظرة عامة على الاستهلاك الحالي', live: 'بيانات لحظية من الحساسات', analytics: 'تحليلات وتوقعات بالذكاء الاصطناعي', devices: 'الأجهزة المتصلة بالمنصة', reports: 'تقارير الاستهلاك والتكاليف', settings: 'تخصيص المنصة' };
 
-    function playSuccessChime() {
-      if (!audioCtx) return;
-      const now = audioCtx.currentTime;
-      [523.25, 659.25, 783.99].forEach((freq, i) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.1, now + i*0.1);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.1 + 0.3);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(now + i*0.1); osc.stop(now + i*0.1 + 0.3);
+    window.setSection = function(name) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === name));
+      document.querySelectorAll('.section').forEach(s => s.classList.toggle('show', s.id === 'sec-' + name));
+      document.getElementById('pageTitle').textContent = titles[name];
+      document.getElementById('pageMeta').textContent = metas[name];
+      closeSidebar();
+      if (name === 'analytics' && isSubscribed()) renderAnalytics();
+      if (name === 'reports' && isSubscribed()) renderReports();
+    };
+
+    window.toggleSidebar = function() {
+      const sb = document.getElementById('sidebar'), bd = document.getElementById('sidebarBackdrop');
+      sb.classList.toggle('open'); bd.classList.toggle('show', sb.classList.contains('open'));
+    };
+    window.closeSidebar = function() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarBackdrop').classList.remove('show'); };
+    window.goToSubscription = function() { setSection('settings'); document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab==='sub')); document.querySelectorAll('.settings-pane').forEach(p => p.classList.toggle('show', p.dataset.pane==='sub')); };
+
+    document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => setSection(n.dataset.section)));
+    document.getElementById('menu-toggle').addEventListener('click', toggleSidebar);
+
+    // ====== الثيم ======
+    window.toggleTheme = function(isLight) {
+      document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+      Object.values(charts).forEach(c => { try { c.update(); } catch(e){} });
+    };
+
+    // ====== الإعدادات ======
+    function setupSettingsTabs() {
+      document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => {
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.toggle('active', x===b));
+        document.querySelectorAll('.settings-pane').forEach(p => p.classList.toggle('show', p.dataset.pane===b.dataset.tab));
+      });
+    }
+    window.saveThresholds = function() {
+      state.thr.water = +document.getElementById('thr-water').value || 60;
+      state.thr.power = +document.getElementById('thr-power').value || 28;
+      state.thr.leak = +document.getElementById('thr-leak').value || 15;
+      alert('تم حفظ حدود التنبيهات ✅');
+    };
+
+    // ====== الدفع ======
+    let payingPlan = null;
+    const PLAN_PRICES = { monthly: '1,200 دج', yearly: '12,000 دج' };
+    const PLAN_NAMES = { monthly: 'الخطة الشهرية', yearly: 'الخطة السنوية' };
+
+    window.openPayment = function(plan) {
+      payingPlan = plan;
+      document.getElementById('payPlanName').textContent = PLAN_NAMES[plan];
+      document.getElementById('payAmount').textContent = PLAN_PRICES[plan];
+      document.getElementById('payStep1').style.display = 'block';
+      document.getElementById('payStep2').style.display = 'none';
+      document.getElementById('payStep3').style.display = 'none';
+      document.getElementById('ps1').classList.add('active');
+      document.getElementById('ps2').classList.remove('active');
+      document.getElementById('ps3').classList.remove('active');
+      document.querySelectorAll('#otpGrid input').forEach(i => i.value = '');
+      document.getElementById('payCcp').value = '';
+      document.getElementById('payPhone').value = '';
+      document.getElementById('payModal').classList.add('show');
+    };
+    window.closePayment = function() { document.getElementById('payModal').classList.remove('show'); };
+    window.payNext1 = function() {
+      const ccp = document.getElementById('payCcp').value.trim();
+      const ph = document.getElementById('payPhone').value.trim();
+      if (ccp.length < 10) { alert('يرجى إدخال رقم حساب بريدي صحيح.'); return; }
+      if (ph.length < 9) { alert('يرجى إدخال رقم هاتف صحيح.'); return; }
+      document.getElementById('payPhoneEcho').textContent = ph;
+      document.getElementById('payStep1').style.display = 'none';
+      document.getElementById('payStep2').style.display = 'block';
+      document.getElementById('ps2').classList.add('active');
+      setTimeout(() => document.querySelector('#otpGrid input').focus(), 100);
+    };
+    window.payBack = function() {
+      document.getElementById('payStep2').style.display = 'none';
+      document.getElementById('payStep1').style.display = 'block';
+      document.getElementById('ps2').classList.remove('active');
+    };
+    window.payConfirm = function() {
+      const otp = Array.from(document.querySelectorAll('#otpGrid input')).map(i => i.value).join('');
+      if (otp !== '123456') { alert('رمز التحقق غير صحيح. الرمز التجريبي هو 123456.'); return; }
+      sessionStorage.setItem('eco_sub', '1');
+      sessionStorage.setItem('eco_plan', payingPlan);
+      document.getElementById('payTxId').textContent = 'BM-' + Date.now().toString().slice(-10);
+      document.getElementById('payDoneName').textContent = PLAN_NAMES[payingPlan];
+      document.getElementById('payStep2').style.display = 'none';
+      document.getElementById('payStep3').style.display = 'block';
+      document.getElementById('ps3').classList.add('active');
+      applyLockState();
+    };
+    window.cancelSub = function() {
+      if (!confirm('هل أنت متأكد من إلغاء الاشتراك؟ سيتم قفل الأقسام المتقدمة.')) return;
+      sessionStorage.removeItem('eco_sub'); sessionStorage.removeItem('eco_plan');
+      applyLockState();
+    };
+    // OTP
+    function setupOtp() {
+      const inputs = document.querySelectorAll('#otpGrid input');
+      inputs.forEach((inp, idx) => {
+        inp.addEventListener('input', () => { inp.value = inp.value.replace(/\D/g, ''); if (inp.value && idx < inputs.length-1) inputs[idx+1].focus(); });
+        inp.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx-1].focus(); });
       });
     }
 
-    function speakEnglishSuccess() {
-      if (!window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance("Identity recognized");
-      utterance.lang = 'ar-US';
-      utterance.rate = 0.9;
-      const voices = window.speechSynthesis.getVoices();
-      const englishVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Google UK English Male') || v.name.includes('Daniel') || v.name.includes('Fred') || v.name.includes('Male')));
-      if (englishVoice) utterance.voice = englishVoice;
-      window.speechSynthesis.speak(utterance);
+    // ====== الرسوم البيانية ======
+    const gridColor = () => getComputedStyle(document.body).getPropertyValue('--border').trim() || 'rgba(255,255,255,0.1)';
+    const txtColor = () => getComputedStyle(document.body).getPropertyValue('--text-dim').trim() || '#94a8c4';
+    function baseOpts() { return { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: txtColor(), font: { family: 'Cairo' } } } }, scales: { x: { ticks: { color: txtColor() }, grid: { color: gridColor() } }, y: { ticks: { color: txtColor() }, grid: { color: gridColor() } } } }; }
+
+    function buildCharts() {
+      charts.h24 = new Chart(document.getElementById('chart-24h'), { type: 'line', data: { labels: Array.from({length:24},(_,i)=>i+':00'), datasets: [{ label: 'الماء', data: Array(24).fill(0).map(()=>rand(20,55)), borderColor: '#40e0a0', tension: .35 }, { label: 'الكهرباء', data: Array(24).fill(0).map(()=>rand(10,25)), borderColor: '#2bbdff', tension: .35 }] }, options: baseOpts() });
+      charts.dWater = new Chart(document.getElementById('chart-water-d'), { type: 'doughnut', data: { labels: ['مستخدم','متاح'], datasets: [{ data: [40,60], backgroundColor: ['#40e0a0','rgba(255,255,255,0.06)'] }] }, options: { cutout:'72%', plugins: { legend: { display: false } } } });
+      charts.dPower = new Chart(document.getElementById('chart-power-d'), { type: 'doughnut', data: { labels: ['مستخدم','متاح'], datasets: [{ data: [40,60], backgroundColor: ['#2bbdff','rgba(255,255,255,0.06)'] }] }, options: { cutout:'72%', plugins: { legend: { display: false } } } });
+    }
+    function renderAnalytics() {
+      if (charts.bar) return;
+      const days = ['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+      charts.bar = new Chart(document.getElementById('chart-bar'), { type: 'bar', data: { labels: days, datasets: [{ label: 'الماء', data: days.map(()=>rand(150,400)), backgroundColor: '#40e0a0' }, { label: 'الكهرباء', data: days.map(()=>rand(80,200)), backgroundColor: '#2bbdff' }] }, options: baseOpts() });
+      charts.radar = new Chart(document.getElementById('chart-radar'), { type: 'radar', data: { labels: ['ماء','كهرباء','تسرب','توفير','ذروة','ليلي'], datasets: [{ label: 'هذا الأسبوع', data: [70,60,15,80,55,30], borderColor: '#40e0a0' }, { label: 'السابق', data: [80,70,25,65,65,40], borderColor: '#2bbdff' }] }, options: { plugins: { legend: { labels: { color: txtColor() } } }, scales: { r: { angleLines: { color: gridColor() }, grid: { color: gridColor() }, pointLabels: { color: txtColor() }, ticks: { display: false } } } } });
+      charts.pie = new Chart(document.getElementById('chart-pie'), { type: 'pie', data: { labels: ['مطبخ','حمام','تكييف','إضاءة','أخرى'], datasets: [{ data: [25,20,30,15,10], backgroundColor: ['#40e0a0','#2bbdff','#ffb454','#ff5577','#9b8cff'] }] } });
+    }
+    function renderReports() {
+      renderMonth(); renderPrev();
+      if (charts.trend) return;
+      const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      charts.trend = new Chart(document.getElementById('chart-trend'), { type: 'line', data: { labels: months, datasets: [{ label: 'الماء', data: months.map(()=>rand(8,18)), borderColor: '#40e0a0' }, { label: 'الكهرباء', data: months.map(()=>rand(3,9)), borderColor: '#2bbdff' }] }, options: baseOpts() });
+    }
+    function renderMonth() {
+      let html = '';
+      for (let w=1; w<=4; w++) { const water=rand(800,1500), power=rand(180,320); html += `<tr><td>الأسبوع ${w}</td><td>${water}</td><td>${power}</td><td>${Math.round(water*0.5+power*8).toLocaleString('ar-DZ')} دج</td><td><span class="pill ${water<1300&&power<280?'':'warn'}">${water<1300&&power<280?'مرشّد':'مرتفع'}</span></td></tr>`; }
+      document.getElementById('month-tbody').innerHTML = html;
+    }
+    function renderPrev() {
+      const months = ['ديسمبر 2025','نوفمبر 2025','أكتوبر 2025','سبتمبر 2025','أغسطس 2025'];
+      document.getElementById('prev-tbody').innerHTML = months.map(m => { const w=Math.round(rand(3500,5500)), p=Math.round(rand(900,1400)); return `<tr><td>${m}</td><td>${w} لتر</td><td>${p} ك.و.س</td><td>${Math.round(w*0.5+p*8).toLocaleString('ar-DZ')} دج</td><td><button class="btn-ghost btn" onclick="alert('تحميل ${m}')"><i class="fas fa-download"></i></button></td></tr>`; }).join('');
     }
 
-    // ---------- عناصر DOM ----------
-    const startupOverlay = document.getElementById('startupOverlay');
-    const initiateBtn = document.getElementById('initiateBtn');
-    const sensor = document.getElementById('fingerprintSensor');
-    const scannerRing = document.getElementById('scannerRing');
-    const scanStateText = document.getElementById('scanStateText');
-    const progressFill = document.getElementById('scanProgressFill');
-    const progressPercent = document.getElementById('progressPercent');
-    const scanDetail = document.getElementById('scanDetail');
-    const profileCard = document.getElementById('profileCard');
-    const avatarImage = document.getElementById('avatarImage');
-    const fullNameDisplay = document.getElementById('fullNameDisplay');
-    const firstNameVal = document.getElementById('firstNameVal');
-    const lastNameVal = document.getElementById('lastNameVal');
-    const birthVal = document.getElementById('birthVal');
-    const orgVal = document.getElementById('orgVal');
-    const addressVal = document.getElementById('addressVal');
-    const statusVal = document.getElementById('statusVal');
-    const rescanBtn = document.getElementById('rescanBtn');
-    const verifyBtn = document.getElementById('verifyBtn');
-    const liveTimeEl = document.getElementById('liveTime');
-    const waveformCanvas = document.getElementById('waveform');
-    const ctxWave = waveformCanvas.getContext('2d');
-
-    let isScanning = false;
-    let scanInterval = null;
-    let currentProfile = subjects[0];
-    let scanProgress = 0;
-
-    // شبكة هولوغرافية
-    const gridCanvas = document.getElementById('hologrid');
-    const gridCtx = gridCanvas.getContext('2d');
-    let gridAngle = 0;
-
-    function resizeGrid() {
-      gridCanvas.width = window.innerWidth;
-      gridCanvas.height = window.innerHeight;
+    // ====== التنبيهات ======
+    function renderAlerts() {
+      const icon = { ok: 'fa-circle-check', warn: 'fa-triangle-exclamation', danger: 'fa-circle-exclamation' };
+      document.getElementById('alerts-list').innerHTML = state.alerts.map(a => `<div class="alert-item ${a.type}"><div class="ai"><i class="fas ${icon[a.type]}"></i></div><div style="flex:1"><div class="am">${a.msg}</div><div class="at">${a.time}</div></div></div>`).join('');
     }
-    window.addEventListener('resize', resizeGrid);
-    resizeGrid();
+    function pushAlert(type, msg) { state.alerts.unshift({ type, msg, time: 'الآن' }); if(state.alerts.length>20) state.alerts.pop(); renderAlerts(); }
+    function beep() { try { const a = new (window.AudioContext||window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value=880; g.gain.value=0.05; o.start(); setTimeout(()=>o.stop(),150); } catch(e){} }
 
-    function drawHoloGrid() {
-      const w = gridCanvas.width, h = gridCanvas.height;
-      gridCtx.clearRect(0, 0, w, h);
-      if (!isScanning) {
-        gridCtx.strokeStyle = 'rgba(0, 240, 255, 0.03)';
-        gridCtx.lineWidth = 0.5;
-        const step = 60;
-        gridCtx.beginPath();
-        for (let x = 0; x <= w; x += step) { gridCtx.moveTo(x, 0); gridCtx.lineTo(x, h); }
-        for (let y = 0; y <= h; y += step) { gridCtx.moveTo(0, y); gridCtx.lineTo(w, y); }
-        gridCtx.stroke();
-        requestAnimationFrame(drawHoloGrid);
-        return;
+    // ====== التحديث الحي ======
+    function tick() {
+      state.water = Math.max(5, Math.min(85, state.water + rand(-8,9)));
+      state.power = Math.max(3, Math.min(45, state.power + rand(-3,4)));
+      state.leak = Math.max(0, Math.min(35, state.leak + rand(-2,2.5)));
+      state.saving = Math.max(0, Math.min(40, state.saving + rand(-1,1)));
+      document.getElementById('kpi-water').textContent = state.water;
+      document.getElementById('kpi-power').textContent = state.power;
+      document.getElementById('kpi-saving').textContent = state.saving.toFixed(0);
+      document.getElementById('kpi-leak').textContent = state.leak.toFixed(1);
+      document.getElementById('live-water').textContent = state.water;
+      document.getElementById('live-power').textContent = state.power;
+      const ws = document.getElementById('water-status'), ps = document.getElementById('power-status');
+      ws.textContent = state.water > state.thr.water ? 'مرتفع' : 'طبيعي'; ws.className = 'pill ' + (state.water>state.thr.water?'bad':'');
+      ps.textContent = state.power > state.thr.power ? 'مرتفع' : 'طبيعي'; ps.className = 'pill ' + (state.power>state.thr.power?'bad':'');
+      if (charts.h24) { const ds = charts.h24.data.datasets; ds[0].data.shift(); ds[0].data.push(state.water); ds[1].data.shift(); ds[1].data.push(state.power); charts.h24.data.labels.shift(); charts.h24.data.labels.push(fmtTime()); charts.h24.update('none'); }
+      if (charts.dWater) { charts.dWater.data.datasets[0].data = [Math.min(100,(state.water/85)*100), 100-Math.min(100,(state.water/85)*100)]; charts.dWater.update('none'); charts.dPower.data.datasets[0].data = [Math.min(100,(state.power/45)*100), 100-Math.min(100,(state.power/45)*100)]; charts.dPower.update('none'); }
+      document.getElementById('sensors-tbody').innerHTML = [{ n:'حساس تدفق المياه', v:state.water+' ل/د', ok:state.water<state.thr.water },{ n:'عداد الكهرباء', v:state.power+' ك.و.س', ok:state.power<state.thr.power },{ n:'حساس التسرب', v:state.leak+'%', ok:state.leak<state.thr.leak },{ n:'جودة الاتصال', v:rand(92,99)+'%', ok:true }].map(r=>`<tr><td>${r.n}</td><td>${r.v}</td><td><span class="pill ${r.ok?'':'bad'}">${r.ok?'طبيعي':'مرتفع'}</span></td><td>${fmtTime()}</td></tr>`).join('');
+      if (isSubscribed()) {
+        document.getElementById('devActive').textContent = Math.floor(rand(7,10));
+        document.getElementById('devLatency').textContent = Math.floor(rand(30,50)) + ' ms';
+        document.getElementById('devSignal').textContent = Math.floor(rand(94,99)) + '%';
+        document.getElementById('devices-tbody').innerHTML = [{ n:'حساس الماء الرئيسي', t:'تدفق', s:'نشط', r:state.water+' ل/د' },{ n:'عداد الكهرباء', t:'طاقة', s:'نشط', r:state.power+' ك.و.س' },{ n:'حساس تسرب الحمام', t:'رطوبة', s:'نشط', r:state.leak+'%' },{ n:'حساس المطبخ', t:'تدفق', s:'نشط', r:rand(8,15)+' ل/د' }].map(d=>`<tr><td>${d.n}</td><td>${d.t}</td><td><span class="pill">${d.s}</span></td><td>${d.r}</td><td><button class="btn-ghost btn" onclick="alert('تفاصيل ${d.n}')"><i class="fas fa-eye"></i></button></td></tr>`).join('');
+        document.getElementById('ai-forecast').textContent = `يتوقع النموذج استهلاكاً إجمالياً قدره ${Math.round(rand(14,18))} م³ من الماء و${Math.round(rand(450,650))} ك.و.س من الكهرباء الشهر القادم.`;
       }
-      gridAngle += 0.005;
-      const centerX = w/2, centerY = h/2, radius = Math.min(w, h) * 0.8;
-      gridCtx.save();
-      gridCtx.translate(centerX, centerY);
-      gridCtx.rotate(gridAngle);
-      gridCtx.strokeStyle = '#00f0ff';
-      gridCtx.lineWidth = 1.5;
-      gridCtx.shadowColor = '#00f0ff';
-      gridCtx.shadowBlur = 10;
-      for (let i = 1; i <= 8; i++) {
-        const r = (radius / 8) * i;
-        gridCtx.beginPath();
-        gridCtx.arc(0, 0, r, 0, Math.PI * 2);
-        gridCtx.strokeStyle = `rgba(0, 240, 255, ${0.1 + i*0.05})`;
-        gridCtx.stroke();
-      }
-      for (let i = 0; i < 24; i++) {
-        const angle = (i / 24) * Math.PI * 2;
-        const x = Math.cos(angle) * radius, y = Math.sin(angle) * radius;
-        gridCtx.beginPath();
-        gridCtx.moveTo(0, 0);
-        gridCtx.lineTo(x, y);
-        gridCtx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
-        gridCtx.stroke();
-      }
-      gridCtx.restore();
-      requestAnimationFrame(drawHoloGrid);
-    }
-    drawHoloGrid();
-
-    function updateClock() {
-      const d = new Date();
-      liveTimeEl.textContent = d.toLocaleTimeString('ar-SA', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    }
-    setInterval(updateClock, 500);
-    updateClock();
-
-    function drawWaveform() {
-      const w = waveformCanvas.width = waveformCanvas.clientWidth || 300;
-      const h = waveformCanvas.height = 60;
-      ctxWave.clearRect(0, 0, w, h);
-      ctxWave.strokeStyle = '#00f0ff';
-      ctxWave.lineWidth = 2;
-      ctxWave.shadowColor = '#00f0ff';
-      ctxWave.shadowBlur = 8;
-      ctxWave.beginPath();
-      const amp = isScanning ? 15 + 15 * Math.sin(scanProgress * 0.2) : 8;
-      for (let x = 0; x < w; x+= 2) {
-        const y = h/2 + Math.sin(x * 0.05 + Date.now()*0.005) * amp * (isScanning ? 1.5 : 1);
-        if (x === 0) ctxWave.moveTo(x, y);
-        else ctxWave.lineTo(x, y);
-      }
-      ctxWave.stroke();
-      requestAnimationFrame(drawWaveform);
-    }
-    drawWaveform();
-
-    function displayProfile(profile) {
-      fullNameDisplay.textContent = profile.fullName;
-      firstNameVal.textContent = profile.firstName;
-      lastNameVal.textContent = profile.lastName;
-      birthVal.textContent = profile.birth;
-      orgVal.textContent = profile.org;
-      addressVal.textContent = profile.address;
-      statusVal.textContent = profile.status;
-      avatarImage.style.backgroundImage = `url('${profile.avatar}')`;
-      profileCard.classList.add('visible');
+      if (state.water > state.thr.water) { pushAlert('danger', `تجاوز استهلاك الماء (${state.water} ل/د)`); beep(); }
+      if (state.power > state.thr.power) { pushAlert('warn', `ارتفاع استهلاك الكهرباء (${state.power} ك.و.س)`); beep(); }
+      if (state.leak > state.thr.leak) { pushAlert('danger', `كشف تسرب محتمل ${state.leak.toFixed(1)}%`); }
+      document.getElementById('ai-insight').textContent = [`يُتوقع توفير ${rand(8,18)}% إذا تم تقليل استخدام التكييف ساعتين.`, `ارتفاع استهلاك الماء بين 18:00 و21:00.`, `الذكاء الاصطناعي رصد نمطاً طبيعياً مع احتمال تسرب ${state.leak}%.`][Math.floor(Math.random()*3)];
     }
 
-    function startScan() {
-      if (isScanning) return;
-      initAudio();
-      
-      isScanning = true;
-      scanProgress = 0;
-      scannerRing.classList.add('scanning');
-      document.body.classList.add('scanning');
-      scanStateText.textContent = '🔄 جاري مسح البصمة...';
-      scanDetail.textContent = 'تحليل الأنماط';
-      profileCard.classList.remove('visible');
-      
-      playScanBeep();
-      
-      // اختيار الشخص بالترتيب الثابت
-      currentProfile = subjects[scanCounter % subjects.length];
-      scanCounter++; // نزيد العداد للمرة القادمة
-      
-      scanInterval = setInterval(() => {
-        scanProgress += 1.8;
-        if (scanProgress >= 100) {
-          scanProgress = 100;
-          completeScan();
-          return;
-        }
-        progressFill.style.width = scanProgress + '%';
-        progressPercent.textContent = Math.floor(scanProgress) + '%';
-        
-        if (scanProgress < 30) scanDetail.textContent = 'التقاط النمط الحيوي';
-        else if (scanProgress < 60) scanDetail.textContent = 'مقارنة مع قاعدة البيانات';
-        else scanDetail.textContent = 'التحقق من التوقيع الرقمي';
-        
-        if (Math.floor(scanProgress) % 20 === 0) playScanBeep();
-      }, 35);
+    // ====== التهيئة ======
+    function boot() {
+      if (window._booted) return; window._booted = true;
+      setupSettingsTabs(); setupOtp();
+      buildCharts(); renderAlerts(); applyLockState();
+      tick(); setInterval(tick, 5000);
+      document.getElementById('simulate-alert').onclick = ()=> { pushAlert('warn','تنبيه محاكى'); beep(); };
+      document.getElementById('refresh-sensors').onclick = ()=> { tick(); alert('تم تحديث الحساسات ✅'); };
+      document.getElementById('add-device').onclick = ()=> alert('فتح معالج إضافة جهاز (محاكاة)');
+      document.getElementById('export-pdf').onclick = ()=> alert('جاري تجهيز PDF...');
+      document.querySelectorAll('.report-view').forEach(b=> b.onclick = ()=> alert('عرض التقرير '+b.dataset.r));
+      document.getElementById('analytics-period').onchange = e=> alert('تغيير الفترة إلى '+e.target.value);
     }
-
-    function completeScan() {
-      clearInterval(scanInterval);
-      isScanning = false;
-      scannerRing.classList.remove('scanning');
-      document.body.classList.remove('scanning');
-      progressFill.style.width = '100%';
-      progressPercent.textContent = '100%';
-      scanStateText.textContent = '✅ تم التحقق · هوية مؤكدة';
-      scanDetail.textContent = 'اكتمل';
-      
-      playSuccessChime();
-      speakEnglishSuccess();
-      
-      displayProfile(currentProfile);
-    }
-
-    function resetAndRescan() {
-      if (isScanning) {
-        clearInterval(scanInterval);
-        isScanning = false;
-        scannerRing.classList.remove('scanning');
-        document.body.classList.remove('scanning');
-      }
-      scanProgress = 0;
-      progressFill.style.width = '0%';
-      progressPercent.textContent = '0%';
-      scanStateText.textContent = 'جاهز · اضغط المستشعر';
-      scanDetail.textContent = 'انتظار';
-      profileCard.classList.remove('visible');
-    }
-
-    // ---------- الأحداث ----------
-    initiateBtn.addEventListener('click', () => {
-      startupOverlay.classList.add('hidden');
-      initAudio();
-      setTimeout(() => playSuccessChime(), 100);
-      // عرض أول شخص في البداية (دون مسح)
-      currentProfile = subjects[0];
-      displayProfile(currentProfile);
-    });
-
-    sensor.addEventListener('click', startScan);
-    scannerRing.addEventListener('click', () => sensor.click());
-
-    rescanBtn.addEventListener('click', () => {
-      resetAndRescan();
-      setTimeout(startScan, 200);
-    });
-
-    verifyBtn.addEventListener('click', () => {
-      if (!currentProfile) return;
-      playSuccessChime();
-      speakEnglishSuccess();
-    });
-
-    document.body.addEventListener('click', function audioUnlock() {
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      if (window.speechSynthesis) window.speechSynthesis.getVoices();
-    }, { once: false });
-
-    // تحميل الأصوات مسبقاً
-    window.addEventListener('load', () => {
-      if (window.speechSynthesis) window.speechSynthesis.getVoices();
-    });
-
   })();
 </script>
 </body>
