@@ -375,7 +375,7 @@ body.approval-required #approvalScreen{display:grid}
       <div class="auth-note">لا توجد خدمة لاسترجاع كلمة المرور من داخل المنصة. احتفظ بها في مكان آمن.</div>
     </div>
 
-    <div class="auth-note">المحتوى التعليمي والصلاحيات لا تُفتح إلا بعد موافقة الإدارة.</div>
+    <div class="auth-note">المحتوى التعليمي والصلاحيات لا تُفتح إلا بعد موافقة المسؤول</div>
   </div>
 </section>
 
@@ -735,7 +735,7 @@ function renderApprovalScreen(){
     $('approvalIcon').textContent='⌛';
     $('approvalTitle').textContent='طلبك قيد المراجعة';
     $('approvalMessage').textContent = requestType === 'teacher'
-      ? 'عليك انتظار الموافقة من الإدارة حتى تتمكن من رؤية المحتويات والنشر في مادتك.'
+      ? 'عليك انتظار الموافقة من المسؤول حتى تتمكن من رؤية المحتويات والنشر في مادتك.'
       : 'عليك انتظار الموافقة من الإدارة لرؤية محتويات المنصة.';
     statusBox.textContent='الحالة: في انتظار موافقة الإدارة.';
   }
